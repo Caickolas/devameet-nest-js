@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserService } from 'src/user/user.service';
 import { CreateMeetDto } from './dtos/createmeet.dto';
-import { GetMeetDto } from './dtos/getmeet.dto';
 import { UpdateMeetDto } from './dtos/updatemeet.dto';
 import { generateLink } from './helpers/linkgenerator.helper';
 import { MeetMessagesHelper } from './helpers/meetmessages.helper';
