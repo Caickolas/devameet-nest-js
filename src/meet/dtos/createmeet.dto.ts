@@ -9,7 +9,6 @@ export class CreateMeetDto {
 
     @IsNotEmpty({ message: MeetMessagesHelper.CREATE_COLOR_NOT_VALID })
     @Matches(/[0-9A-Fa-f]{6}/g, {
-    message: MeetMessagesHelper.CREATE_COLOR_NOT_VALID,
-  })
+    message: MeetMessagesHelper.CREATE_COLOR_NOT_VALID})
     color:string;
 }
