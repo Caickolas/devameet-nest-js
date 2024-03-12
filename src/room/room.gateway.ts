@@ -28,7 +28,21 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
   private logger = new Logger(RoomGateway.name);
   private activeSockets: ActiveSocketType[] = [];
 
-  handleDisconnect(client: any) {
+  async handleDisconnect(client: any) {
+    const existingOnSocket =  this.activeSockets.find(
+      socket => socket.id === client.id
+    );
+
+    if(!existingOnSocket) return;
+
+    this.activeSockets.filter(
+      socket => socket.id !== client.id
+    );
+
+    await this.service.deleteUsersPosition(client.id)
+    client.broadcast.emit(`Client: ${client.id} disconnected`)
+
+
     this.logger.debug(`Client: ${client.id} disconnected`);
   }
 
@@ -63,7 +77,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
       client.broadcast.emit(`${link}-add-user`, { user: client.id });
     }
 
-    this.logger.debug(`Socket client: ${client.id} start to join room${link}`);
+    this.logger.debug(`Socket client: ${client.id} start to join room ${link}`);
   }
 
   @SubscribeMessage('move')
@@ -89,5 +103,23 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
     await this.service.updateUserMute(payload);
     const users = await this.service.listUsersPositionByLink(link);
     this.wss.emit(`${link}-update-user-list`, { users });
+  }
+
+  @SubscribeMessage('call-user')
+  async callUser(client: Socket, data: any) {
+    this.logger.debug(`callUser: ${client.id} to ${data.to}`);
+    client.to(data.to).emit('call-made', {
+      offer: data.offer,
+      socket: client.id
+    });
+  }
+
+  @SubscribeMessage('make-answer')
+  async makeAnswer(client: Socket, data: any) {
+    this.logger.debug(`makeAnswer: ${client.id} to ${data.to}`);
+    client.to(data.to).emit('answer-made', {
+      answer: data.answer,
+      socket: client.id
+    });
   }
 }
